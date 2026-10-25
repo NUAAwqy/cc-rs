@@ -287,13 +287,10 @@ impl Tool {
                     zig_cc: is_zig_cc(path, env, cargo_output),
                 }),
                 (false, false, true, _, false) | (_, _, _, _, true) => Ok(ToolFamily::Gnu),
-                (false, false, false, false, false) => {
-                    cargo_output.print_warning(&"Compiler family detection failed since it does not define `__clang__`, `__GNUC__`, `__EMSCRIPTEN__` or `__VXWORKS__`, also does not accept cl style flag `-?`, fallback to treating it as GNU");
-                    Err(Error::new(
-                        ErrorKind::ToolFamilyMacroNotFound,
-                        "Expects macro `__clang__`, `__GNUC__` or `__EMSCRIPTEN__`, `__VXWORKS__` or accepts cl style flag `-?`, but found none",
-                    ))
-                }
+                (false, false, false, false, false) => Err(Error::new(
+                    ErrorKind::ToolFamilyMacroNotFound,
+                    "Expects macro `__clang__`, `__GNUC__` or `__EMSCRIPTEN__`, `__VXWORKS__` or accepts cl style flag `-?`, but found none",
+                )),
             }
         }
 

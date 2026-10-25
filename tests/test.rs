@@ -2486,6 +2486,54 @@ fn gnu_ar_probe_failure_no_warning() {
     );
 }
 
+/// A compiler whose family detection probe answers with something cc does not
+/// recognise is reported with one warning, not two.
+///
+/// This test runs the build in a subprocess so we can capture and assert on the
+/// actual stdout output.
+#[test]
+fn compiler_family_detection_warns_once() {
+    // When invoked as subprocess, perform the build and return.
+    if env::var_os("__CC_TEST_FAMILY_DETECTION_WARN").is_some() {
+        let test = Test::gnu();
+        test.gcc()
+            .env(
+                "CC_SHIM_STDOUT_FOR_FAMILY_DETECTION",
+                "#define __UNRECOGNISED__ 1",
+            )
+            .env("CC_SHIM_FAIL_IF_ARG", "-?")
+            .file("foo.c")
+            .compile("foo");
+        return;
+    }
+
+    let output = GlobalEnv::output(
+        Command::new(env::current_exe().unwrap())
+            .env("__CC_TEST_FAMILY_DETECTION_WARN", "1")
+            .env_remove("CC_ENABLE_DEBUG_OUTPUT")
+            .args([
+                "--exact",
+                "compiler_family_detection_warns_once",
+                "--nocapture",
+            ]),
+    );
+    assert!(output.status.success(), "subprocess failed: {:?}", output);
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let warnings: Vec<&str> = stdout
+        .lines()
+        .filter(|line| {
+            line.starts_with("cargo:warning=") && line.contains("Compiler family detection failed")
+        })
+        .collect();
+    assert_eq!(
+        warnings.len(),
+        1,
+        "expected one family detection warning, got:\n{}",
+        stdout
+    );
+}
+
 /// Each line a compiler writes to stderr becomes exactly one warning, also
 /// when a failed compile's error is reported between them.
 ///
