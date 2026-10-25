@@ -167,6 +167,22 @@ fn gnu_arm_neon_is_vfpv3_not_vfpv4() {
 }
 
 #[test]
+fn gnu_arm_musl_targets_use_a_musl_gnu_prefix() {
+    for (target, prefix) in [
+        ("arm-unknown-linux-musleabi", "arm-linux-musleabi"),
+        ("armv5te-unknown-linux-musleabi", "arm-linux-musleabi"),
+        ("armv5te-unknown-linux-gnueabi", "arm-linux-gnueabi"),
+    ] {
+        let test = Test::gnu();
+        test.shim(&format!("{prefix}-gcc"))
+            .shim(&format!("{prefix}-ar"));
+        test.gcc().target(target).file("foo.c").compile("foo");
+        test.cmd(0).must_run(&format!("{prefix}-gcc"));
+        drop(test);
+    }
+}
+
+#[test]
 fn gnu_warnings_into_errors() {
     let test = Test::gnu();
     test.gcc()

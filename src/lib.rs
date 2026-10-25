@@ -4811,7 +4811,7 @@ impl Build {
         ("armv5te-none-eabi", "arm-none-eabi"),
         ("armv5te-unknown-helenos-eabi", "arm-helenos"),
         ("armv5te-unknown-linux-gnueabi", "arm-linux-gnueabi"),
-        ("armv5te-unknown-linux-musleabi", "arm-linux-gnueabi"),
+        ("armv5te-unknown-linux-musleabi", "arm-linux-musleabi"),
         ("armv6-none-eabi", "arm-none-eabi"),
         ("armv6-none-eabihf", "arm-none-eabi"),
         ("armv6-unknown-netbsd-eabihf", "armv6--netbsdelf-eabihf"),
